@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prochain Sabbat</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap');
+  html,body{margin:0;height:100%;background:#2A2438;overflow:hidden;}
+  .widget{
+    width:100%;height:100%;box-sizing:border-box;padding:22px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:radial-gradient(circle at 50% 0%, #352D47 0%, #2A2438 70%);
+    color:#F4ECD8;font-family:'Inter',sans-serif;text-align:center;
+  }
+  .eyebrow{font-size:10.5px;color:#8B7299;text-transform:uppercase;letter-spacing:0.08em;}
+  .sabbat-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;color:#F4ECD8;margin-top:2px;}
+  .moon-divider{width:50px;height:1px;background:#8B7299;margin:10px 0;position:relative;}
+  .moon-divider::after{content:'';position:absolute;left:50%;top:-3px;width:6px;height:6px;border-radius:50%;background:#C9A15A;transform:translateX(-50%);}
+  .countdown{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;color:#C9A15A;}
+  .countdown-label{font-size:11px;color:#8B7299;text-transform:uppercase;letter-spacing:0.05em;}
+  .date-sabbat{font-size:11.5px;color:#E8DCC4;margin-top:6px;}
+</style>
+</head>
+<body>
+  <div class="widget">
+    <div class="eyebrow">Prochain sabbat</div>
+    <div class="sabbat-name" id="sabbatName">—</div>
+    <div class="moon-divider"></div>
+    <div class="countdown" id="countdown">—</div>
+    <div class="countdown-label">jours restants</div>
+    <div class="date-sabbat" id="dateSabbat"></div>
+  </div>
+<script>
+// Dates des 8 sabbats — calculées pour l'hémisphère NORD
+// Si tu veux les dates exactes au lieu des approximations traditionnelles (ex: équinoxes/solstices précis), modifie ci-dessous
+function getSabbats(year) {
+  return [
+    { nom: "Imbolc", mois: 1, jour: 2 },           // 1er-2 février
+    { nom: "Ostara (Équinoxe de printemps)", mois: 2, jour: 20 },  // ~20 mars
+    { nom: "Beltane", mois: 4, jour: 1 },           // 1er mai
+    { nom: "Litha (Solstice d'été)", mois: 5, jour: 21 },          // ~21 juin
+    { nom: "Lughnasadh", mois: 7, jour: 1 },        // 1er août
+    { nom: "Mabon (Équinoxe d'automne)", mois: 8, jour: 22 },      // ~22 septembre
+    { nom: "Samhain", mois: 9, jour: 31 },          // 31 octobre
+    { nom: "Yule (Solstice d'hiver)", mois: 11, jour: 21 }         // ~21 décembre
+  ];
+}
+
+const now = new Date();
+const thisYear = now.getFullYear();
+const nextYear = thisYear + 1;
+
+let allDates = [];
+[thisYear, nextYear].forEach(year => {
+  getSabbats(year).forEach(s => {
+    allDates.push({ nom: s.nom, date: new Date(year, s.mois, s.jour) });
+  });
+});
+
+allDates = allDates.filter(s => s.date > now).sort((a,b) => a.date - b.date);
+const next = allDates[0];
+
+const diffDays = Math.ceil((next.date - now) / 86400000);
+
+document.getElementById('sabbatName').textContent = next.nom;
+document.getElementById('countdown').textContent = diffDays;
+
+const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+document.getElementById('dateSabbat').textContent = next.date.getDate() + ' ' + mois[next.date.getMonth()] + ' ' + next.date.getFullYear();
+</script>
+</body>
+</html>
