@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Pomodoro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap');
+  html,body{margin:0;height:100%;background:#2A2438;overflow:hidden;}
+  .widget{
+    width:100%;height:100%;box-sizing:border-box;padding:20px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    background:radial-gradient(circle at 50% 0%, #352D47 0%, #2A2438 70%);
+    color:#F4ECD8;font-family:'Inter',sans-serif;
+  }
+  .ring{position:relative;width:100px;height:100px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:#3C3450;stroke-width:6;}
+  .ring-progress{fill:none;stroke:#C9A15A;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+  .time-display{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cormorant Garamond',serif;font-weight:600;font-size:22px;color:#F4ECD8;
+  }
+  .label{font-size:11px;color:#8B7299;text-transform:uppercase;letter-spacing:0.06em;}
+  .controls{display:flex;gap:8px;margin-top:4px;}
+  button{
+    background:#3C3450;color:#F4ECD8;border:1px solid #8B7299;border-radius:6px;
+    padding:6px 14px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;
+  }
+  button:hover{background:#8B7299;}
+  button.active{background:#C9A15A;color:#2A2438;border-color:#C9A15A;}
+</style>
+</head>
+<body>
+  <div class="widget">
+    <div class="ring">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="44"></circle>
+        <circle class="ring-progress" id="ringProgress" cx="50" cy="50" r="44" stroke-dasharray="276" stroke-dashoffset="0"></circle>
+      </svg>
+      <div class="time-display" id="display">25:00</div>
+    </div>
+    <div class="label" id="statusLabel">Focus</div>
+    <div class="controls">
+      <button id="startPause">Démarrer</button>
+      <button id="reset">↺</button>
+    </div>
+  </div>
+<script>
+const FOCUS_TIME = 25 * 60;
+const BREAK_TIME = 5 * 60;
+const CIRCUMFERENCE = 2 * Math.PI * 44;
+
+let timeLeft = FOCUS_TIME;
+let totalTime = FOCUS_TIME;
+let isRunning = false;
+let isBreak = false;
+let interval = null;
+
+const display = document.getElementById('display');
+const ringProgress = document.getElementById('ringProgress');
+const startPauseBtn = document.getElementById('startPause');
+const statusLabel = document.getElementById('statusLabel');
+
+ringProgress.style.strokeDasharray = CIRCUMFERENCE;
+
+function updateDisplay() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2,'0');
+  const s = String(timeLeft % 60).padStart(2,'0');
+  display.textContent = m + ':' + s;
+  const progress = timeLeft / totalTime;
+  ringProgress.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+}
+
+function tick() {
+  if (timeLeft > 0) {
+    timeLeft--;
+    updateDisplay();
+  } else {
+    isBreak = !isBreak;
+    totalTime = isBreak ? BREAK_TIME : FOCUS_TIME;
+    timeLeft = totalTime;
+    statusLabel.textContent = isBreak ? 'Pause' : 'Focus';
+    updateDisplay();
+  }
+}
+
+startPauseBtn.addEventListener('click', () => {
+  isRunning = !isRunning;
+  if (isRunning) {
+    interval = setInterval(tick, 1000);
+    startPauseBtn.textContent = 'Pause';
+    startPauseBtn.classList.add('active');
+  } else {
+    clearInterval(interval);
+    startPauseBtn.textContent = 'Reprendre';
+    startPauseBtn.classList.remove('active');
+  }
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  clearInterval(interval);
+  isRunning = false;
+  isBreak = false;
+  timeLeft = FOCUS_TIME;
+  totalTime = FOCUS_TIME;
+  statusLabel.textContent = 'Focus';
+  startPauseBtn.textContent = 'Démarrer';
+  startPauseBtn.classList.remove('active');
+  updateDisplay();
+});
+
+updateDisplay();
+</script>
+</body>
+</html>
